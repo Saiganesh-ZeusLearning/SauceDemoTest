@@ -1,59 +1,61 @@
 import { BrowserContext, expect, Locator, Page } from "@playwright/test";
+import { AppURLs } from "../testConfig";
 
 export class LoginPage {
     readonly page: Page;
     readonly context: BrowserContext;
 
-    readonly UsernameField: Locator;
-    readonly PasswordField: Locator;
+    readonly usernameInput: Locator;
+    readonly passwordInput: Locator;
 
-    readonly LoginBtn: Locator;
-    readonly ErrorField: Locator;
+    readonly loginButton: Locator;
+    readonly errorMessageText: Locator;
 
-    constructor(page: Page, context: BrowserContext) {
+    readonly menuButton: Locator;
+    readonly cartLink: Locator;
+
+    constructor(page: Page) {
         this.page = page;
-        this.context = context;
 
-        this.UsernameField = this.page.locator("//input[@id='user-name']");
-        this.PasswordField = this.page.locator("//input[@id='password']");
+        this.usernameInput = this.page.locator('[data-test="username"]');
+        this.passwordInput = this.page.locator('[data-test="password"]');
 
-        this.LoginBtn = this.page.locator("//input[@id='login-button']");
+        this.loginButton = this.page.locator("[data-test='login-button']");
 
-        this.ErrorField = this.page.locator("h3[data-test='error']");
+        this.errorMessageText = this.page.locator("[data-test='error']");
+
+        this.menuButton = this.page.locator("#react-burger-menu-btn");
+        this.cartLink = this.page.locator("[data-test='shopping-cart-link']");
     }
 
-    async goto() {
-        this.page.goto("https://www.saucedemo.com/");
+    async goto(url = AppURLs.base): Promise<void> {
+        await this.page.goto(url);
     }
 
-    async loginUser(userName: string, passWord: string) {
+    async loginUser(userName: string, passWord: string): Promise<void> {
 
-        await this.UsernameField.fill(userName);
-        await this.PasswordField.fill(passWord);
+        await this.usernameInput.fill(userName);
+        await this.passwordInput.fill(passWord);
 
-        await this.LoginBtn.click();
+        await this.loginButton.click();
     }
 
-    async verifyLogin() {
-        await expect(this.page.url()).toContain("inventory");
-        await expect(this.page.locator("#react-burger-menu-btn")).toBeVisible;
-        await expect(this.page.locator("//a[@class='shopping_cart_link']")).toBeVisible;
+    async verifyLogin(): Promise<void> {
+        await expect(this.page).toHaveURL(/.*inventory.*/);
+        await expect(this.menuButton).toBeVisible();
+        await expect(this.cartLink).toBeVisible();
     }
 
-    async verifyLoginWithIncorrectCredentials() {
-        
-        await expect(this.ErrorField).toBeVisible();
-        await expect(this.ErrorField).toHaveText("Epic sadface: Username and password do not match any user in this service");
+    async verifyLoginErrorMessage(expectedMessage: string): Promise<void>{
+        await expect(this.errorMessageText).toBeVisible();
+        await expect(this.errorMessageText).toHaveText(expectedMessage);
     }
 
-    async verifyLoginWithEmptyUsername(){
-
-        await expect(this.ErrorField).toBeVisible();
-        await expect(this.ErrorField).toHaveText("Epic sadface: Username is required");
+    async restrictUserToAccessInventoryWithoutLogin(): Promise<void>{
+        await expect(this.errorMessageText).toHaveText("Epic sadface: You can only access '/inventory.html' when you are logged in.");
     }
 
-    async verifyLoginWithEmptyPassword(){
-        await expect(this.ErrorField).toHaveText("Epic sadface: Password is required");
-
+    async restrictUserToAccessCartWithoutLogin(): Promise<void>{
+        await expect(this.errorMessageText).toHaveText("Epic sadface: You can only access '/cart.html' when you are logged in.");
     }
 };
