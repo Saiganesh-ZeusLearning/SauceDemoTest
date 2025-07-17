@@ -1,9 +1,8 @@
-import { BrowserContext, expect, Locator, Page } from "@playwright/test";
+import { expect, Locator, Page } from "@playwright/test";
 import { AppURLs } from "../testConfig";
 
 export class LoginPage {
     readonly page: Page;
-    readonly context: BrowserContext;
 
     readonly usernameInput: Locator;
     readonly passwordInput: Locator;

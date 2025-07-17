@@ -1,43 +1,35 @@
-import test from "@playwright/test";
-import { LoginPage } from "../POM/loginPage";
-import { InventoryPage } from "../POM/InventoryPage";
 import { SortType } from "../testConfig";
-
-let inventoryPage: InventoryPage;
+import { test } from "../PomFixture/pomFixture";
 
 test.describe("Inventory page testing", () => {
 
-    test.beforeEach(async ({ page }) => {
-        const loginPage = new LoginPage(page);
+    test.beforeEach(async ({ loginPage }) => {
         await loginPage.goto();
-
         await loginPage.loginUser("standard_user", "secret_sauce");
-
-        inventoryPage = new InventoryPage(page);
     })
 
-    test("Functionality of Hamburger Button", async () => {
+    test("Functionality of Hamburger Button", async ({ inventoryPage }) => {
         await inventoryPage.clickOnHamburgerOpenBtn();
         await inventoryPage.verifyHamburgerWorking();
     })
 
-    test("Functionality of Hamburger About Button", async () => {
+    test("Functionality of Hamburger About Button", async ({ inventoryPage }) => {
         await inventoryPage.clickOnHamburgerOpenBtn();
         await inventoryPage.clickOnHamburgerAboutBtn();
         await inventoryPage.verifyHamburgerAboutBtnWorking();
     })
 
-    test("Functionality of Hamburger Logout Button", async () => {
+    test("Functionality of Hamburger Logout Button", async ({ inventoryPage }) => {
         await inventoryPage.clickOnHamburgerOpenBtn();
         await inventoryPage.clickOnHamburgerLogoutBtn();
         await inventoryPage.verifyHamburgerLogoutBtnWorking();
     })
 
-    test("should add item to cart and display correct cart badge count", async () => {
+    test("should add item to cart and display correct cart badge count", async ({ inventoryPage }) => {
         await inventoryPage.clickOnAddToCart(1);
         await inventoryPage.verifyCartBadgeCount("1");
     })
-    test("should reset cart when Reset App State is clicked", async () => {
+    test("should reset cart when Reset App State is clicked", async ({ inventoryPage }) => {
         await inventoryPage.clickOnAddToCart(1);
         await inventoryPage.verifyCartBadgeCount("1");
         await inventoryPage.clickOnHamburgerOpenBtn();
@@ -46,12 +38,12 @@ test.describe("Inventory page testing", () => {
         await inventoryPage.verifyCartBadgeCount("");
     })
 
-    test("should add Item to the cart", async () => {
+    test("should add Item to the cart", async ({ inventoryPage }) => {
         await inventoryPage.clickOnAddToCart(1);
         await inventoryPage.verifyAddToCartBtn();
     })
 
-    test("should count items of Cart ", async () => {
+    test("should count items of Cart ", async ({ inventoryPage }) => {
         for (let i = 0; i < 3; i++) {
             await inventoryPage.clickOnAddToCart(i);
         }
@@ -64,7 +56,7 @@ test.describe("Inventory page testing", () => {
     ] as const;
 
     sortingOptionsByTitle.forEach((sort) => {
-        test(`should sort items from ${sort.label}`, async () => {
+        test(`should sort items from ${sort.label}`, async ({ inventoryPage }) => {
             await inventoryPage.sortBy(sort.value);
             await inventoryPage.verifyTitleSort(sort.expected)
         })
@@ -76,7 +68,7 @@ test.describe("Inventory page testing", () => {
     ] as const;
 
     sortingOptionsByPrice.forEach((sort) => {
-        test(`should sort items from ${sort.label}`, async () => {
+        test(`should sort items from ${sort.label}`, async ({ inventoryPage }) => {
             await inventoryPage.sortBy(sort.value);
             await inventoryPage.verifyPriceSort(sort.expected)
         })
