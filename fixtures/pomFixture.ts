@@ -1,6 +1,6 @@
 import { test as base } from "@playwright/test";
-import { LoginPage } from "../POM/loginPage";
-import { InventoryPage } from "../POM/InventoryPage";
+import { LoginPage } from "./pages/SauceDemo/login.page";
+import { InventoryPage } from "./pages/SauceDemo/inventory.page";
 
 type testPagesType = {
     loginPage: LoginPage;

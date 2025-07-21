@@ -1,9 +1,9 @@
-import { BrowserContext, expect, Locator, Page } from "@playwright/test";
-import { AppURLs, SortType } from "../testConfig";
+import { expect, Locator, Page } from "@playwright/test";
+import { SauceDemoTestData } from "../../testdata/sauceDemo.testData";
 
 export class InventoryPage {
     readonly page: Page;
-    readonly context: BrowserContext;
+    readonly sdTestData: SauceDemoTestData;
 
     readonly cartBtn: Locator;
     readonly cartBadge: Locator;
@@ -19,12 +19,15 @@ export class InventoryPage {
     readonly sidebarLogout: Locator;
     readonly sidebarResetAppState: Locator;
 
-
     readonly titleListOfEachCard: Locator;
     readonly priceListOfEachCard: Locator;
 
+    readonly usernameInput: Locator;
+    readonly passwordInput: Locator;
+
     constructor(page: Page) {
         this.page = page;
+        this.sdTestData = new SauceDemoTestData();
 
         this.sortBySelector = this.page.locator("[data-test='product-sort-container']");
 
@@ -44,6 +47,9 @@ export class InventoryPage {
 
         this.titleListOfEachCard = this.page.locator("//a[contains(@data-test,'title-link')]");
         this.priceListOfEachCard = this.page.locator("//div[contains(@data-test,'inventory-item-price')]");
+
+        this.usernameInput = this.page.locator('[data-test="username"]');
+        this.passwordInput = this.page.locator('[data-test="password"]');
 
     }
 
@@ -84,13 +90,13 @@ export class InventoryPage {
     }
 
     async verifyHamburgerAboutBtnWorking() {
-        await expect(this.page).toHaveURL(AppURLs.aboutPage);
+        await expect(this.page).toHaveURL(this.sdTestData.AppURLs.aboutPage);
     }
 
     async verifyHamburgerLogoutBtnWorking() {
-        await expect(this.page).toHaveURL(AppURLs.base);
-        await expect(this.page.locator("//input[@id='user-name']")).toBeVisible();
-        await expect(this.page.locator("//input[@id='password']")).toBeVisible();
+        await expect(this.page).toHaveURL(this.sdTestData.AppURLs.loginPage);
+        await expect(this.usernameInput).toBeVisible();
+        await expect(this.passwordInput).toBeVisible();
     }
 
     async verifyCartBadgeCount(badgeCount: string) {
@@ -105,21 +111,21 @@ export class InventoryPage {
         await expect(this.removeItemBtnList.first()).toBeVisible();
     }
 
-    async sortBy(value){
+    async sortBy(value) {
         switch (value) {
-            case SortType.Az:
+            case this.sdTestData.SortType.Az:
                 await this.sortBySelector.selectOption("az");
                 break;
-            case SortType.Za:
+            case this.sdTestData.SortType.Za:
                 await this.sortBySelector.selectOption("za");
                 break;
-            case SortType.LowToHigh:
+            case this.sdTestData.SortType.LowToHigh:
                 await this.sortBySelector.selectOption("lohi");
                 break;
-            case SortType.HighToLow:
+            case this.sdTestData.SortType.HighToLow:
                 await this.sortBySelector.selectOption("hilo");
                 break;
-        
+
             default:
                 break;
         }
@@ -134,7 +140,6 @@ export class InventoryPage {
         }
 
         const sortedTitles = [...titles].sort((a, b) => a.localeCompare(b));
-
         if (expectedOrder === 'desc') sortedTitles.reverse();
 
         expect(titles).toEqual(sortedTitles);

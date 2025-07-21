@@ -1,12 +1,26 @@
-import { SortType } from "../testConfig";
-import { test } from "../PomFixture/pomFixture";
+import { Page } from "@playwright/test";
+import { test } from "../fixtures/pomFixture";
+import { SauceDemoTestData } from "../fixtures/testdata/sauceDemo.testData";
+import { SauceDemoCommonFuctions } from "../fixtures/commonFunctions/SauceDemoCommonFunctions";
 
 test.describe("Inventory page testing", () => {
 
-    test.beforeEach(async ({ loginPage }) => {
-        await loginPage.goto();
+    let currentPage: Page;
+    let sdTestData: SauceDemoTestData;
+    let sdCommon: SauceDemoCommonFuctions;
+
+    test.beforeEach(async ({ page, loginPage }) => {
+        currentPage = page;
+        sdCommon = new SauceDemoCommonFuctions(currentPage);
+        sdTestData = new SauceDemoTestData();
+
+        // Navigates to the URL
+        await sdCommon.navigateTo(sdTestData.AppURLs.loginPage);
+
+        //Login the user
         await loginPage.loginUser("standard_user", "secret_sauce");
     })
+
 
     test("Functionality of Hamburger Button", async ({ inventoryPage }) => {
         await inventoryPage.clickOnHamburgerOpenBtn();
@@ -50,28 +64,21 @@ test.describe("Inventory page testing", () => {
         await inventoryPage.verifyCartBadgeCount("3");
     })
 
-    const sortingOptionsByTitle = [
-        { label: 'A to Z', value: SortType.Az, expected: "asc" },
-        { label: 'Z to A', value: SortType.Za, expected: "desc" },
-    ] as const;
-
-    sortingOptionsByTitle.forEach((sort) => {
-        test(`should sort items from ${sort.label}`, async ({ inventoryPage }) => {
-            await inventoryPage.sortBy(sort.value);
-            await inventoryPage.verifyTitleSort(sort.expected)
-        })
+    test("Dynamic Data Validation 1", async ({ inventoryPage }) => {
+        for (const sort of sdTestData.sortingOptionsByTitle) {
+            await test.step(`should sort items from ${sort.label}`, async () => {
+                await inventoryPage.sortBy(sort.value);
+                await inventoryPage.verifyTitleSort(sort.expected);
+            });
+        }
     })
 
-    const sortingOptionsByPrice = [
-        { label: 'Low to High', value: SortType.LowToHigh, expected: 'asc' },
-        { label: 'High to Low', value: SortType.HighToLow, expected: 'desc' },
-    ] as const;
-
-    sortingOptionsByPrice.forEach((sort) => {
-        test(`should sort items from ${sort.label}`, async ({ inventoryPage }) => {
-            await inventoryPage.sortBy(sort.value);
-            await inventoryPage.verifyPriceSort(sort.expected)
-        })
+    test("Dynamic Data Validation 2", async ({ inventoryPage }) => {
+        for (const sort of sdTestData.sortingOptionsByPrice) {
+            await test.step(`should sort items from ${sort.label}`, async () => {
+                await inventoryPage.sortBy(sort.value);
+                await inventoryPage.verifyPriceSort(sort.expected)
+            });
+        }
     })
-
 })

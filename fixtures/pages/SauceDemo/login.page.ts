@@ -1,8 +1,9 @@
 import { expect, Locator, Page } from "@playwright/test";
-import { AppURLs } from "../testConfig";
+import { SauceDemoTestData } from "../../testdata/sauceDemo.testData";
 
 export class LoginPage {
     readonly page: Page;
+    readonly sdTestData: SauceDemoTestData;
 
     readonly usernameInput: Locator;
     readonly passwordInput: Locator;
@@ -15,6 +16,7 @@ export class LoginPage {
 
     constructor(page: Page) {
         this.page = page;
+        this.sdTestData = new SauceDemoTestData();
 
         this.usernameInput = this.page.locator('[data-test="username"]');
         this.passwordInput = this.page.locator('[data-test="password"]');
@@ -25,10 +27,6 @@ export class LoginPage {
 
         this.menuButton = this.page.locator("#react-burger-menu-btn");
         this.cartLink = this.page.locator("[data-test='shopping-cart-link']");
-    }
-
-    async goto(url = AppURLs.base): Promise<void> {
-        await this.page.goto(url);
     }
 
     async loginUser(userName: string, passWord: string): Promise<void> {
@@ -51,10 +49,10 @@ export class LoginPage {
     }
 
     async restrictUserToAccessInventoryWithoutLogin(): Promise<void>{
-        await expect(this.errorMessageText).toHaveText("Epic sadface: You can only access '/inventory.html' when you are logged in.");
+        await expect(this.errorMessageText).toHaveText(this.sdTestData.ErrorMessages.restrictUserFromAccessingInventory);
     }
 
     async restrictUserToAccessCartWithoutLogin(): Promise<void>{
-        await expect(this.errorMessageText).toHaveText("Epic sadface: You can only access '/cart.html' when you are logged in.");
+        await expect(this.errorMessageText).toHaveText(this.sdTestData.ErrorMessages.restrictUserFromAccessingCart);
     }
 };
